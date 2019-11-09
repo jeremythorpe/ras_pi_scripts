@@ -3,8 +3,6 @@ import numpy as np
 import curses
 from curses import wrapper
 
-import getcode
-
 def main(_):
   blank = '\n\n\n\n\n\n\n     '
   with open ('words', 'r') as f:
@@ -16,24 +14,27 @@ def main(_):
       prefixes[word[:i]] = True
   code = ''
   scr = curses.initscr()
+  curses.cbreak()
+  curses.noecho()
   scr.keypad(True)
   curses.raw()
   curses.curs_set(False)
-  getcode.getcode(scr)
   curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
   curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
   curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_BLACK)
   while True:
     x = scr.getch()
-    if x < 128:
+    if x < 128 or x == 263:
       if x == 9:
         goodwords = {word: True for word in words if word.startswith(code)}
         if goodwords:
           code = goodwords.keys()[0]
+      elif x == 263:
+        code = code[:-1]
       else:
         code += str(chr(x))
-        if not code in prefixes:
-          code = code[:-1]
+        #if not code in prefixes:
+        #  code = code[:-1]
       scr.clear()
       if code in words:
         scr.addstr(blank + code, curses.color_pair(1))
