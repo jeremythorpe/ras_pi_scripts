@@ -70,19 +70,23 @@ def get_pos(map):
         return np.array([i, j])
   return None
 
-def printmap(scr, map):
-  s = ''
+def putchar(scr, pos, value):
+  value = int(value)
   rep = {0: ' ',
          1: '*',
          2: 'o',
          3: '#',
          4: '$'}
-  lines = []
-  for i in range(map.shape[0]):
-    lines.append(''.join([rep[m] for m in map[i]]))
+  scr.addstr(pos[0], pos[1], '')
+  scr.addstr(rep[value], curses.color_pair(value))
+
+def printmap(scr, map):
   scr.clear()
-  for line in lines:
-    scr.addstr(line + '\n')
+  for i in range(map.shape[0]):
+    for j in range(map.shape[1]):
+      m = map[i][j]
+      pos = np.array([i, j])
+      putchar(scr, pos, m)
 
 def valid(map, pos):
   if pos[0] < 0:
@@ -94,10 +98,6 @@ def valid(map, pos):
   if pos[1] >= map.shape[1]:
     return False
   return True
-
-def puthash(scr, pos):
-  scr.addstr(pos[0], pos[1], '')
-  scr.addstr('#', curses.color_pair(3))
 
 def move(scr, map):
   key = scr.getch()
@@ -123,9 +123,9 @@ def move(scr, map):
     return True
   if new_pos is not None:
     map[pos[0], pos[1]] = 0
-    scr.addch(pos[0], pos[1], '.')
+    putchar(scr, pos, 0)
     map[new_pos[0], new_pos[1]] = 3
-    puthash(scr, new_pos)
+    putchar(scr, new_pos, 3)
     return
 
 def main(_):
@@ -133,11 +133,12 @@ def main(_):
   scr.keypad(True)
   curses.raw()
   curses.curs_set(False)
-  # getcode.getcode(scr)
-  curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
+  curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_MAGENTA)
+  curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
+  curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLUE)
+  curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_CYAN)
   map = make_maze()
   printmap(scr, map)
-  puthash(scr, get_pos(map))
   while True:
     if move(scr, map):
       break
