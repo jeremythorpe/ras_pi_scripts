@@ -1,11 +1,14 @@
 
+import sys
+import os
 import numpy as np
 import curses
 from curses import wrapper
 
 def main(_):
   blank = '\n\n\n\n\n\n\n     '
-  with open ('words', 'r') as f:
+  script_location = os.path.dirname(sys.argv[0])
+  with open (os.path.join(script_location, 'words'), 'r') as f:
     d = f.read()
   words = {word: True for word in d.split('\n')}
   prefixes = {}
