@@ -1,11 +1,12 @@
 
 
+import argparse
 import curses
-# import getcode
 import numpy as np
 import numpy.random as rand
 
 from curses import wrapper
+
 
 win = False
 
@@ -37,8 +38,8 @@ def open_adjacent(maze, c):
       a += 1
   return a
 
-def make_maze():
-  maze = np.zeros([10, 20])
+def make_maze(h, w):
+  maze = np.zeros([h, w])
   while True:
     start = (rand.random([2]) * maze.shape).astype(np.int)
     if (start == 0).any():
@@ -49,7 +50,6 @@ def make_maze():
   maze[start[0], start[1]] = 3
   maze[end[0], end[1]] = 4
   r = np.prod(maze.shape)
-  # print(reachable(maze, start))
   for i in range(500):
     c = (rand.random([2]) * maze.shape).astype(np.int)
     if maze[c[0], c[1]] != 0:
@@ -63,10 +63,10 @@ def make_maze():
       r -= 1
   return maze
 
-def get_pos(map):
-  for i in range(len(map)):
-    for j in range(len(map[i])):
-      if map[i, j] == 3:
+def get_pos(maze):
+  for i in range(len(maze)):
+    for j in range(len(maze[i])):
+      if maze[i, j] == 3:
         return np.array([i, j])
   return None
 
@@ -80,28 +80,28 @@ def putchar(scr, pos, value):
   scr.addstr(pos[0], pos[1], '')
   scr.addstr(rep[value], curses.color_pair(value))
 
-def printmap(scr, map):
+def printmap(scr, maze):
   scr.clear()
-  for i in range(map.shape[0]):
-    for j in range(map.shape[1]):
-      m = map[i][j]
+  for i in range(maze.shape[0]):
+    for j in range(maze.shape[1]):
+      m = maze[i][j]
       pos = np.array([i, j])
       putchar(scr, pos, m)
 
-def valid(map, pos):
+def valid(maze, pos):
   if pos[0] < 0:
     return False
-  if pos[0] >= map.shape[0]:
+  if pos[0] >= maze.shape[0]:
     return False
   if pos[1] < 0:
     return False
-  if pos[1] >= map.shape[1]:
+  if pos[1] >= maze.shape[1]:
     return False
   return True
 
-def move(scr, map):
+def move(scr, maze):
   key = scr.getch()
-  pos = get_pos(map)
+  pos = get_pos(maze)
   dirs = {curses.KEY_DOWN: [1, 0],
           curses.KEY_UP: [-1, 0],
           curses.KEY_LEFT: [0, -1],
@@ -110,25 +110,30 @@ def move(scr, map):
     return True
   if key not in dirs:
     return
-  pos = get_pos(map)
+  pos = get_pos(maze)
   delta = np.array(dirs[key])
   new_pos = pos + delta
-  if not valid(map, new_pos):
+  if not valid(maze, new_pos):
     return
-  if map[new_pos[0], new_pos[1]] == 1:
+  if maze[new_pos[0], new_pos[1]] == 1:
     return
-  if map[new_pos[0], new_pos[1]] == 4:
+  if maze[new_pos[0], new_pos[1]] == 4:
     global win
     win = True
     return True
   if new_pos is not None:
-    map[pos[0], pos[1]] = 0
+    maze[pos[0], pos[1]] = 0
     putchar(scr, pos, 0)
-    map[new_pos[0], new_pos[1]] = 3
+    maze[new_pos[0], new_pos[1]] = 3
     putchar(scr, new_pos, 3)
     return
 
 def main(_):
+  parser = argparse.ArgumentParser(description='Fun maze game.')
+  parser.add_argument('-t', type=int, default=10)
+  parser.add_argument('-w', type=int, default=20)
+  args = parser.parse_args()
+
   scr = curses.initscr()
   scr.keypad(True)
   curses.raw()
@@ -137,10 +142,10 @@ def main(_):
   curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
   curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLUE)
   curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_CYAN)
-  map = make_maze()
-  printmap(scr, map)
+  maze = make_maze(args.t, args.w)
+  printmap(scr, maze)
   while True:
-    if move(scr, map):
+    if move(scr, maze):
       break
   scr.clear()
   scr.refresh()
