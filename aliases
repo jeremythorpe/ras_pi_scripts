@@ -1,0 +1,4 @@
+
+alias w='python ras_pi_scripts/words.py'
+alias monster='python ras_pi_scripts/monster.py'
+alias maze='python ras_pi_scripts/maze.py'
