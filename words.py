@@ -1,4 +1,5 @@
 
+import argparse
 import sys
 import os
 import numpy as np
@@ -6,9 +7,13 @@ import curses
 from curses import wrapper
 
 def main(_):
+  parser = argparse.ArgumentParser(description='Word game.')
+  parser.add_argument('-w', type=str, default='words')
+  args = parser.parse_args()
+
   blank = '\n\n\n\n\n\n\n     '
   script_location = os.path.dirname(sys.argv[0])
-  with open (os.path.join(script_location, 'words'), 'r') as f:
+  with open (os.path.join(script_location, args.w), 'r') as f:
     d = f.read()
   words = {word: True for word in d.split('\n')}
   prefixes = {}
