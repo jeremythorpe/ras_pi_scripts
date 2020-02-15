@@ -22,7 +22,7 @@ def printmap(scr, shape):
     for i in range(shape[0]):
         for j in range(shape[1]):
             pos = np.array([i, j])
-            putchar(scr, pos, 6, 'z')
+            putchar(scr, pos, 6, ' ')
 
 
 def balloon(scr, shape, pos, radius, color):
@@ -31,7 +31,7 @@ def balloon(scr, shape, pos, radius, color):
             di = i - pos[0]
             dj = j - pos[1]
             if di * di + dj * dj <= radius * radius:
-                putchar(scr, [i,j], color, '*')
+                putchar(scr, [i,j], color, ' ')
                 
 
 def main(_):
