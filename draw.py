@@ -71,7 +71,6 @@ def main(_):
             curses.init_pair(idx, curses.COLOR_BLACK, value)
         colors[key] = idx
         idx += 1
-    colors[ord(' ')] = idx
 
     shape = np.array([args.t, args.w])
     pos = shape // 2
@@ -87,12 +86,15 @@ def main(_):
     radius = 0
     while True:
         key = scr.getch()
+        if key == ord(' '):
+            color = 9
+            printmap(scr, board, pos, color)
+            continue
         if key in colors:
             if color != colors[key]:
                 radius = 0
                 color = colors[key]
-                if color != 9:
-                    board[pos[0], pos[1]] = color
+                board[pos[0], pos[1]] = color
                 printmap(scr, board, pos, color)
                 continue
             radius += 1
