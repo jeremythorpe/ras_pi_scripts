@@ -17,21 +17,29 @@ def putchar(scr, pos, color, char):
     scr.addstr(char, curses.color_pair(color))
 
 
-def printmap(scr, shape):
+def printmap(scr, board, position, color):
     scr.clear()
-    for i in range(shape[0]):
-        for j in range(shape[1]):
+    for i in range(board.shape[0]):
+        for j in range(board.shape[1]):
             pos = np.array([i, j])
-            putchar(scr, pos, 6, ' ')
+            if all(pos == position):
+                if color == 9:
+                    ch = 'o'
+                else:
+                    ch = '.'
+            else:
+                ch = ' '
+            putchar(scr, pos, board[i,j], ch)
 
 
-def balloon(scr, shape, pos, radius, color):
-    for i in range(shape[0]):
-        for j in range(shape[1]):
+def balloon(scr, board, pos, radius, color):
+    for i in range(board.shape[0]):
+        for j in range(board.shape[1]):
             di = i - pos[0]
             dj = j - pos[1]
             if di * di + dj * dj <= radius * radius:
-                putchar(scr, [i,j], color, ' ')
+                board[i, j] = color
+    printmap(scr, board, pos, color)
                 
 
 def main(_):
@@ -55,18 +63,21 @@ def main(_):
         ord('w'): curses.COLOR_WHITE,
     }
     idx = 1
+    colors = {}
     for key, value in colormap.items():
         if key == ord('k'):
             curses.init_pair(idx, curses.COLOR_WHITE, value)
         else:
             curses.init_pair(idx, curses.COLOR_BLACK, value)
-        colormap[key] = idx
+        colors[key] = idx
         idx += 1
+    colors[ord(' ')] = idx
 
     shape = np.array([args.t, args.w])
     pos = shape // 2
     board = np.zeros(shape, dtype=int)
-    printmap(scr, shape)
+    color = colors[ord('w')]
+    printmap(scr, board, pos, color)
 
     dirs = {curses.KEY_DOWN: [1, 0],
             curses.KEY_UP: [-1, 0],
@@ -74,17 +85,18 @@ def main(_):
             curses.KEY_RIGHT: [0, 1]}
 
     radius = 0
-    color = 1
     while True:
         key = scr.getch()
-        if key in colormap:
-            if color != colormap[key]:
+        if key in colors:
+            if color != colors[key]:
                 radius = 0
-                color = colormap[key]
-                putchar(scr, pos, color, '.')
+                color = colors[key]
+                if color != 9:
+                    board[pos[0], pos[1]] = color
+                printmap(scr, board, pos, color)
                 continue
             radius += 1
-            balloon(scr, shape, pos, radius, color)
+            balloon(scr, board, pos, radius, color)
             continue
         radius = 0
         if key == 27:
@@ -94,12 +106,11 @@ def main(_):
         delta = np.array(dirs[key])
     
         new_pos = pos + delta
-        if not valid(shape, new_pos):
-            continue
-    
-        putchar(scr, pos, color, ' ')
-        pos = new_pos
-        putchar(scr, pos, color, '.')
+        if valid(shape, new_pos):
+            pos = new_pos
+            if color != 9:
+                board[pos[0], pos[1]] = color
+            printmap(scr, board, pos, color)
 
 wrapper(main)
 
