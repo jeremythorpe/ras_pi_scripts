@@ -60,11 +60,11 @@ def main(_):
       if x < 128 or x == 263:
         if x == 263:
           answer = answer[:-1]
-        elif x >= 48 and x < 58:
+        elif x >= 48 and x < 58 or x == 45:
           #if player_turn:
           answer += str(chr(x))
         elif x == 10:
-          if int(answer) != solution:
+          if player_turn and answer and int(answer) != solution:
             turn += 1
           break
         elif x == 27:
